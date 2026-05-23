@@ -157,4 +157,4 @@ Each module follows the same pattern — if you want to add a technique:
 
 ## 📄 License
 
-MIT — use freely, put your mind to work!.
+Use freely, put your mind to work!.
