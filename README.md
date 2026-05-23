@@ -14,8 +14,8 @@ I build this repo with the main idea of not only teaching myself but helping oth
 | # | Technique | Status | Module |
 |---|-----------|--------|--------|
 | 0 | [Zero-Shot Prompting](modules/00_zero_shot/) | ✅ Active | `modules/00_zero_shot` |
-| 1 | [Few-Shot Prompting](modules/01_few_shot/) | ✅ Active | `modules/01_few_shot` |
-| 2 | [Chain-of-Thought](modules/02_chain_of_thought/) | ✅ Active | `modules/02_chain_of_thought` |
+| 1 | [Few-Shot Prompting](modules/01_few_shot/) | 🔜 Soon | `modules/01_few_shot` |
+| 2 | [Chain-of-Thought](modules/02_chain_of_thought/) | 🔜 Soon | `modules/02_chain_of_thought` |
 | 3 | [Meta Prompting](modules/03_meta_prompting/) | 🔜 Soon | `modules/03_meta_prompting` |
 | 4 | Self-Consistency | 🔜 Soon | — |
 | 5 | Generate Knowledge Prompting | 🔜 Soon | — |
