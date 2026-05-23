@@ -1,54 +1,40 @@
-# Contributing to LLM Prompting Lab
+# Contributing
 
-Thanks for helping build this curriculum! Here's how to add a new module.
+If you want to add a new module or improve an existing one, this is how things are organized.
 
 ## Module structure
 
-Every module follows the same 4-script pattern:
+Every module follows the same pattern:
 
 ```
 modules/NN_technique_name/
-├── README.md                    ← 4-step explainer
+├── README.md                    ← what the technique is and how to run it
 ├── scripts/
-│   ├── 01_generate_dataset.py  ← Generate data via GPT/Claude
+│   ├── 01_generate_dataset.py  ← generate data via Groq
 │   ├── 02_train.py             ← Fine-tune a model
-│   ├── 03_evaluate.py          ← Compare to baselines
+│   ├── 03_evaluate.py          ← compare against baselines
 │   └── 04_visualize.py         ← Plot results
 ├── notebooks/
-│   └── NN_walkthrough.ipynb    ← Interactive guided notebook
-└── data/                       ← Generated data lands here (gitignored)
+│   └── NN_walkthrough.ipynb    ← guided notebook version
+└── data/                       ← generated data lands here (gitignored)
 ```
 
-## Steps to add a module
+## Adding a module
 
-1. Pick the next available number (`NN`) from the curriculum table in `README.md`
-2. Copy `modules/00_zero_shot/` as a template
-3. Update `scripts/01_generate_dataset.py` with your task-specific prompts
-4. Choose an appropriate model in `scripts/02_train.py` (T5 for seq2seq, DistilBERT for classification, GPT-2 for generation)
-5. Write a meaningful baseline comparison in `scripts/03_evaluate.py`
-6. Add a visualization that shows the key insight in `scripts/04_visualize.py`
-7. Write a `README.md` that:
-   - Explains the technique in 2 sentences
-   - Lists the 4 steps clearly
-   - Includes a cost estimate for dataset generation
-   - Ends with a "Key insight" section
+1. Pick the next number (`NN`) from the curriculum table in `README.md`
+2. Copy `modules/00_zero_shot/` as your starting point
+3. Update `01_generate_dataset.py` with prompts specific to your technique
+4. Pick the right model in `02_train.py` — DistilBERT for classification, T5 for seq2seq, GPT-2 for generation
+5. Write a real baseline comparison in `03_evaluate.py` — random and zero-shot at minimum
+6. Make sure `04_visualize.py` shows something meaningful, not just a loss curve
+7. Write a `README.md` that explains the technique plainly, lists the steps, and ends with a key insight
 8. Update the curriculum table in the root `README.md`
-9. Open a PR!
+9. Open a PR
 
-## Code style
+## A few things to keep consistent
 
 - Python 3.10+
-- Type hints on all function signatures
+- Type hints on function signatures
 - `argparse` for CLI args with sensible defaults
-- Print progress — these scripts take minutes to run
-- `shared/utils/api_helpers.py` for all API calls (don't duplicate)
-
-## Cost estimates
-
-Each module should document approximate API costs in its README:
-
-| Examples | Model | Approximate cost |
-|---------|-------|-----------------|
-| 200 | GPT-3.5-turbo | ~$0.05 |
-| 200 | GPT-4o-mini | ~$0.10 |
-| 200 | Claude Haiku | ~$0.04 |
+- Print progress as scripts run; these take a few minutes, and silent scripts are annoying
+- Use `shared/utils/api_helpers.py` for all Groq calls, don't duplicate the client setup
