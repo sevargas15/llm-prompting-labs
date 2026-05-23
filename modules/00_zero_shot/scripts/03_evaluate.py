@@ -1,27 +1,37 @@
 """
-Step 3: Evaluate your fine-tuned model and compare to GPT zero-shot.
+Step 3: Evaluate your fine-tuned model and compare to Groq zero-shot.
 
 Usage:
     python scripts/03_evaluate.py --model checkpoints/best_model --test-data data/sentiment_test.jsonl
-    python scripts/03_evaluate.py --model checkpoints/best_model --test-data data/sentiment_test.jsonl --gpt-baseline
+    python scripts/03_evaluate.py --model checkpoints/best_model --test-data data/sentiment_test.jsonl --groq-baseline
 """
 
 import os
 import json
 import time
 import argparse
+import random
 from pathlib import Path
 
 import torch
 import numpy as np
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix
+from transformers import (
+    AutoTokenizer,
+    AutoModelForSequenceClassification,
+    logging as transformers_logging,
+)
+from sklearn.metrics import accuracy_score, f1_score, classification_report
 from dotenv import load_dotenv
 
 load_dotenv()
 
+transformers_logging.set_verbosity_error()
+
 LABEL2ID = {"happy": 0, "neutral": 1, "sad": 2}
 ID2LABEL = {v: k for k, v in LABEL2ID.items()}
+
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+GROQ_MODEL = "llama-3.1-8b-instant"
 
 
 def load_test_data(path: str):
@@ -63,26 +73,30 @@ def predict_finetuned(model, tokenizer, texts, device, batch_size=32):
     return all_preds, np.mean(latencies)
 
 
-def predict_gpt_zeroshot(texts, model="gpt-3.5-turbo"):
-    """Zero-shot predict with GPT (single calls, for accurate latency)."""
+def predict_groq_zeroshot(texts):
+    """Zero-shot predict with Groq (single calls for accurate latency)."""
     try:
         from openai import OpenAI
     except ImportError:
-        raise ImportError("pip install openai")
+        raise ImportError("Run: pip install openai")
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        raise EnvironmentError("OPENAI_API_KEY not set")
+        raise EnvironmentError(
+            "\n❌ GROQ_API_KEY not set.\n"
+            "   1. Get your free key at https://console.groq.com\n"
+            "   2. Add it to your .env file: GROQ_API_KEY=gsk_...\n"
+        )
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=api_key, base_url=GROQ_BASE_URL)
     preds = []
     latencies = []
 
-    print(f"  Running GPT zero-shot on {len(texts)} examples...")
+    print(f"  Running Groq zero-shot on {len(texts)} examples...")
     for i, text in enumerate(texts):
         start = time.time()
         response = client.chat.completions.create(
-            model=model,
+            model=GROQ_MODEL,
             messages=[
                 {"role": "system", "content": "You are a sentiment classifier. Respond with exactly one word: happy, neutral, or sad."},
                 {"role": "user", "content": f"Classify the sentiment of this text:\n\n{text}"}
@@ -93,9 +107,10 @@ def predict_gpt_zeroshot(texts, model="gpt-3.5-turbo"):
         elapsed = (time.time() - start) * 1000
         pred = response.choices[0].message.content.strip().lower()
         if pred not in LABEL2ID:
-            pred = "neutral"  # fallback
+            pred = "neutral"
         preds.append(pred)
         latencies.append(elapsed)
+        time.sleep(0.5)  # gentle rate limiting
 
         if (i + 1) % 5 == 0:
             print(f"    {i+1}/{len(texts)} done...")
@@ -109,8 +124,8 @@ def print_results(name, labels, preds, avg_latency_ms):
     print(f"\n{'='*50}")
     print(f"  {name}")
     print(f"{'='*50}")
-    print(f"  Accuracy:  {acc:.4f} ({acc*100:.1f}%)")
-    print(f"  Macro F1:  {f1:.4f}")
+    print(f"  Accuracy:    {acc:.4f} ({acc*100:.1f}%)")
+    print(f"  Macro F1:    {f1:.4f}")
     print(f"  Avg latency: {avg_latency_ms:.1f} ms/example")
     print(f"\n  Per-class report:")
     print(classification_report(labels, preds, target_names=list(LABEL2ID.keys()), indent=4))
@@ -118,7 +133,7 @@ def print_results(name, labels, preds, avg_latency_ms):
 
 def print_comparison_table(results):
     print("\n" + "="*60)
-    print("  COMPARISON SUMMARY")
+    print("  FINAL COMPARISON")
     print("="*60)
     print(f"  {'Model':<30} {'Accuracy':>10} {'F1':>8} {'Latency':>12}")
     print(f"  {'-'*30} {'-'*10} {'-'*8} {'-'*12}")
@@ -128,12 +143,13 @@ def print_comparison_table(results):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Evaluate your fine-tuned model and compare to Groq zero-shot"
+    )
     parser.add_argument("--model", default="checkpoints/best_model")
     parser.add_argument("--test-data", default="data/sentiment_test.jsonl")
-    parser.add_argument("--gpt-baseline", action="store_true",
-                        help="Also run GPT zero-shot baseline (costs API credits)")
-    parser.add_argument("--gpt-model", default="gpt-3.5-turbo")
+    parser.add_argument("--groq-baseline", action="store_true",
+                        help="Also run Groq zero-shot baseline (free)")
     args = parser.parse_args()
 
     print(f"\n📋 Loading test data from {args.test_data}")
@@ -144,7 +160,6 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Evaluate fine-tuned model
     print(f"\n🔍 Loading fine-tuned model from {args.model}")
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForSequenceClassification.from_pretrained(args.model).to(device)
@@ -157,29 +172,27 @@ def main():
     comparison_results = [("Fine-tuned DistilBERT", ft_acc, ft_f1, ft_latency)]
 
     # Random baseline
-    import random
     random_preds = [random.choice(list(LABEL2ID.keys())) for _ in texts]
     rand_acc = accuracy_score(labels, random_preds)
     rand_f1 = f1_score(labels, random_preds, average="macro")
     comparison_results.append(("Random baseline", rand_acc, rand_f1, 0.1))
 
-    # GPT zero-shot (optional)
-    if args.gpt_baseline:
-        print(f"\n🤖 Running GPT zero-shot baseline ({args.gpt_model})")
-        print("   (This will make API calls and cost ~$0.01)")
-        gpt_preds, gpt_latency = predict_gpt_zeroshot(texts, args.gpt_model)
-        gpt_acc = accuracy_score(labels, gpt_preds)
-        gpt_f1 = f1_score(labels, gpt_preds, average="macro")
-        print_results(f"GPT zero-shot ({args.gpt_model})", labels, gpt_preds, gpt_latency)
-        comparison_results.insert(0, (f"GPT zero-shot ({args.gpt_model})", gpt_acc, gpt_f1, gpt_latency))
+    # Groq zero-shot (optional)
+    if args.groq_baseline:
+        print(f"\n🤖 Running Groq zero-shot baseline ({GROQ_MODEL})")
+        groq_preds, groq_latency = predict_groq_zeroshot(texts)
+        groq_acc = accuracy_score(labels, groq_preds)
+        groq_f1 = f1_score(labels, groq_preds, average="macro")
+        print_results(f"Groq zero-shot ({GROQ_MODEL})", labels, groq_preds, groq_latency)
+        comparison_results.insert(0, (f"Groq zero-shot ({GROQ_MODEL})", groq_acc, groq_f1, groq_latency))
 
     print_comparison_table(comparison_results)
 
-    # Key insight
     print("\n💡 Key Insight:")
-    print("   Your fine-tuned model is specialized — it's been trained specifically")
-    print("   on this task's data distribution. Zero-shot GPT is general-purpose.")
+    print("   Your fine-tuned model is specialized — trained specifically on this task.")
+    print("   Zero-shot Groq is general-purpose and much larger.")
     print("   Specialization + smaller model = faster inference at comparable accuracy.")
+    print("   With more training data, your model would likely close the gap entirely.")
 
 
 if __name__ == "__main__":

@@ -17,10 +17,13 @@ from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification,
     get_linear_schedule_with_warmup,
+    logging as transformers_logging,
 )
 from torch.optim import AdamW
 from sklearn.metrics import accuracy_score, f1_score
 
+# This suppress the LOAD REPORT warning when adding a classification head
+transformers_logging.set_verbosity_error()
 
 LABEL2ID = {"happy": 0, "neutral": 1, "sad": 2}
 ID2LABEL = {v: k for k, v in LABEL2ID.items()}
@@ -94,7 +97,6 @@ def train(
     print(f"   Model: {model_name}")
     print(f"   Data:  {data_path}")
 
-    # Derive split paths
     data_dir = Path(data_path).parent
     task = "sentiment"
 
@@ -106,7 +108,6 @@ def train(
         label2id=LABEL2ID,
     ).to(device)
 
-    # Load splits (fall back to full dataset if splits not found)
     train_path = data_dir / f"{task}_train.jsonl"
     val_path = data_dir / f"{task}_val.jsonl"
 
@@ -158,7 +159,7 @@ def train(
         avg_train_loss = train_loss / len(train_loader)
         val_loss, val_acc, val_f1 = evaluate(model, val_loader, device)
 
-        print(f"\n📊 Epoch {epoch}/{epochs}")
+        print(f"\n Epoch {epoch}/{epochs}")
         print(f"   Train loss: {avg_train_loss:.4f}")
         print(f"   Val loss:   {val_loss:.4f}")
         print(f"   Val acc:    {val_acc:.4f}")
@@ -169,7 +170,7 @@ def train(
             save_path = output_path / "best_model"
             model.save_pretrained(save_path)
             tokenizer.save_pretrained(save_path)
-            print(f"   💾 Saved best model (F1={val_f1:.4f})")
+            print(f"    Saved best model (F1={val_f1:.4f})")
 
         print()
 

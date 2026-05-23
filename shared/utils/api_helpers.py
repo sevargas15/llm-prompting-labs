@@ -1,32 +1,39 @@
-"""
-Shared utilities for calling GPT/Claude to generate datasets.
-Used across all modules.
-"""
-
 import os
 import json
 import time
-from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv()
 
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+GROQ_MODEL    = "llama-3.1-8b-instant"
 
-def call_gpt(
-    system_prompt: str,
-    user_prompt: str,
-    model: str = "gpt-3.5-turbo",
-    temperature: float = 0.9,
-    max_tokens: int = 3000,
-    retries: int = 3,
-) -> str:
-    """Call OpenAI GPT and return the text response."""
+
+def get_groq_client():
     try:
         from openai import OpenAI
     except ImportError:
-        raise ImportError("pip install openai")
+        raise ImportError("Run: pip install openai")
 
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise EnvironmentError(
+            "\n❌ GROQ_API_KEY not set.\n"
+            "   1. Get your free key at https://console.groq.com\n"
+            "   2. Add it to your .env:  GROQ_API_KEY=gsk_...\n"
+        )
+    return OpenAI(api_key=api_key, base_url=GROQ_BASE_URL)
+
+
+def call_groq(
+    system_prompt: str,
+    user_prompt: str,
+    model: str = GROQ_MODEL,
+    temperature: float = 0.9,
+    max_tokens: int = 2048,
+    retries: int = 3,
+) -> str:
+    client = get_groq_client()
 
     for attempt in range(retries):
         try:
@@ -34,71 +41,73 @@ def call_gpt(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
+                    {"role": "user",   "content": user_prompt},
                 ],
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
             return response.choices[0].message.content.strip()
+
         except Exception as e:
+            if "rate_limit" in str(e).lower() or "429" in str(e):
+                print(f"  Rate limit hit — waiting 60s...")
+                time.sleep(60)
+                continue
             if attempt < retries - 1:
                 wait = 2 ** attempt
-                print(f"  API error (attempt {attempt+1}/{retries}): {e}. Retrying in {wait}s...")
+                print(f"  Retrying in {wait}s... ({e})")
                 time.sleep(wait)
             else:
                 raise
 
 
-def call_claude(
+def call_openai(
     system_prompt: str,
     user_prompt: str,
-    model: str = "claude-haiku-4-5-20251001",
+    model: str = "gpt-3.5-turbo",
     temperature: float = 0.9,
-    max_tokens: int = 3000,
+    max_tokens: int = 2048,
 ) -> str:
-    """Call Anthropic Claude and return the text response."""
+    """Optional — only used for baseline comparisons."""
     try:
-        import anthropic
+        from openai import OpenAI
     except ImportError:
-        raise ImportError("pip install anthropic")
+        raise ImportError("Run: pip install openai")
 
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    message = client.messages.create(
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise EnvironmentError("OPENAI_API_KEY not set — use Groq instead (it's free).")
+
+    client = OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
         model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt},
+        ],
+        temperature=temperature,
         max_tokens=max_tokens,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
     )
-    return message.content[0].text.strip()
+    return response.choices[0].message.content.strip()
 
 
 def parse_json_response(raw: str) -> list | dict:
-    """Parse a JSON response, stripping markdown fences if present."""
     text = raw.strip()
-    if text.startswith("```"):
-        parts = text.split("```")
-        text = parts[1]
+    if "```" in text:
+        text = text.split("```")[1]
         if text.startswith("json"):
             text = text[4:]
     return json.loads(text.strip())
 
 
 def save_jsonl(examples: list, path: str):
-    """Save a list of dicts to a JSONL file."""
-    import os
     os.makedirs(os.path.dirname(path) if os.path.dirname(path) else ".", exist_ok=True)
     with open(path, "w") as f:
         for ex in examples:
-            f.write(json.dumps(ex) + "\n")
+            f.write(json.dumps(ex, ensure_ascii=False) + "\n")
     print(f"  Saved {len(examples)} examples to {path}")
 
 
 def load_jsonl(path: str) -> list:
-    """Load a JSONL file into a list of dicts."""
-    examples = []
     with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                examples.append(json.loads(line))
-    return examples
+        return [json.loads(line) for line in f if line.strip()]
