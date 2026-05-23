@@ -1,17 +1,15 @@
-# 🧠 LLM Prompting Lab
+# LLM Prompting Labs
 
-> Don't just learn prompting techniques — **build** them from scratch.
+I build this repo with the main idea of not only teaching myself but helping others to actually understand the different prompting techniques and how to build, train and use your own models from scratch. For each technique, you will:
 
-This repo is a hands-on curriculum where you train your own mini language models to understand 17 prompting techniques. For each technique, you will:
-
-1. **Generate a dataset** using a frontier model (GPT-3.5/4 or Claude)
-2. **Fine-tune a small model** on that dataset (DistilBERT, T5-small, GPT-2)
+1. **Generate a meaningful dataset**
+2. **Fine-tune your own small models** on that dataset
 3. **Evaluate** your model against baselines
-4. **Understand** _why_ the technique works — from the inside
+4. **Understand** *why* the technique works from the inside
 
 ---
 
-## 📚 Curriculum
+## Prompting Techniques
 
 | # | Technique | Status | Module |
 |---|-----------|--------|--------|
@@ -22,50 +20,66 @@ This repo is a hands-on curriculum where you train your own mini language models
 | 4 | Self-Consistency | 🔜 Soon | — |
 | 5 | Generate Knowledge Prompting | 🔜 Soon | — |
 | 6 | Prompt Chaining | 🔜 Soon | — |
-| 7 | Tree of Thoughts | 📅 Planned | — |
-| 8 | Retrieval Augmented Generation | 📅 Planned | — |
-| 9 | Automatic Reasoning & Tool Use | 📅 Planned | — |
-| 10 | Automatic Prompt Engineer | 📅 Planned | — |
-| 11 | Active-Prompt | 📅 Planned | — |
-| 12 | Directional Stimulus Prompting | 📅 Planned | — |
-| 13 | Program-Aided Language Models | 📅 Planned | — |
-| 14 | ReAct | 📅 Planned | — |
-| 15 | Reflexion | 📅 Planned | — |
-| 16 | Multimodal CoT | 📅 Planned | — |
-| 17 | Graph Prompting | 📅 Planned | — |
+| 7 | Tree of Thoughts | 🔜 Soon | — |
+| 8 | Retrieval Augmented Generation | 🔜 Soon | — |
+| 9 | Automatic Reasoning & Tool Use | 🔜 Soon | — |
+| 10 | Automatic Prompt Engineer | 🔜 Soon | — |
+| 11 | Active-Prompt | 🔜 Soon | — |
+| 12 | Directional Stimulus Prompting | 🔜 Soon | — |
+| 13 | Program-Aided Language Models | 🔜 Soon | — |
+| 14 | ReAct | 🔜 Soon | — |
+| 15 | Reflexion | 🔜 Soon | — |
+| 16 | Multimodal CoT | 🔜 Soon | — |
+| 17 | Graph Prompting | 🔜 Soon | — |
 
 ---
 
-## 🚀 Quick Start
+## Where to start?
 
-### 1. Clone and install
+### 1. First, clone and install this repo in your local environment
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/llm-prompting-lab.git
-cd llm-prompting-lab
+git clone https://github.com/YOUR_USERNAME/llm-prompting-labs.git
+cd llm-prompting-labs
 pip install -r requirements.txt
 ```
 
 ### 2. Set your API key
 
+To keep these labs accessible to everyone, we'll use Groq as the default LLM provider. It's free, requires no credit card, and gives you API access to Llama 3.1, so let's say you get the real developer workflow without spending a cent.
+
 ```bash
 cp .env.example .env
-# Add your OpenAI or Anthropic key to .env
+# Add your Groq key to .env
 ```
 
-### 3. Start with Module 0 — Zero-Shot
+#### Getting your free Groq API key
+
+1. Go to [console.groq.com](https://console.groq.com) and sign up
+2. Click **API Keys** in the left sidebar → **Create API Key**
+3. Copy the key and paste it in your `.env` file:
+   ```
+   GROQ_API_KEY=gsk_...your key here...
+   ```
+
+> **Free tier limitations:** 30 requests/min, 14,400 requests/day. Each module generates ~200 examples in ~10 requests, so you'll never come close to the limit in a single session/module. If you do hit it, the script will wait automatically and resume, this with the intention of not losing any data in the process.
+
+> Never commit your `.env` file. The `.gitignore` already excludes it, but always double-check with `git status` before pushing.
+
+
+### 3. Start with Module 0 - Zero-Shot
 
 ```bash
 cd modules/00_zero_shot
 
-# Step 1: Generate a dataset using GPT
+# Step 1: Generate a dataset using Groq
 python scripts/01_generate_dataset.py --task sentiment --n 200
 
 # Step 2: Fine-tune a DistilBERT classifier
-python scripts/02_train.py --data data/sentiment_dataset.jsonl
+python scripts/02_train.py --data data/sentiment_raw.jsonl
 
 # Step 3: Evaluate and compare to zero-shot baseline
-python scripts/03_evaluate.py --model checkpoints/latest
+python scripts/03_evaluate.py --model checkpoints/best_model
 ```
 
 Or open the notebook for a guided walkthrough:
@@ -76,7 +90,7 @@ jupyter notebook notebooks/00_zero_shot_walkthrough.ipynb
 
 ---
 
-## 🏗 Repo Structure
+## Repo Structure
 
 ```
 llm-prompting-lab/
@@ -84,7 +98,7 @@ llm-prompting-lab/
 │   ├── 00_zero_shot/           ← Start here
 │   │   ├── notebooks/          ← Interactive Jupyter walkthrough
 │   │   ├── scripts/            ← CLI scripts for each step
-│   │   └── data/               ← Generated datasets land here
+│   │   └── data/               ← Your new datasets should land here
 │   ├── 01_few_shot/
 │   ├── 02_chain_of_thought/
 │   └── ...
@@ -99,36 +113,38 @@ llm-prompting-lab/
 
 ---
 
-## 🧩 What you'll actually build
+## What you'll actually build
 
-### Module 0 — Zero-Shot Prompting
+### Module 0 - Zero-Shot Prompting
 
 **The idea:** A model trained on billions of tokens already knows how to classify sentiment, recognize patterns, and answer questions — without any task-specific examples.
 
 **What you build:**
-- Use GPT-3.5 to generate a labeled sentiment dataset (200+ samples)
+- Use Groq to generate a labeled sentiment dataset (200+ samples)
 - Fine-tune `distilbert-base-uncased` as a 3-class classifier (happy / neutral / sad)
-- Compare accuracy: your fine-tuned model vs pure zero-shot GPT
+- Compare accuracy: your fine-tuned model vs Groq zero-shot baseline
 - Visualize the learned representations with t-SNE
 
 **Key insight:** Zero-shot works because pretraining creates general-purpose representations. Fine-tuning on generated data teaches you _how much_ task-specific data actually matters.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack Used
 
-| Purpose | Library |
-|---------|---------|
-| Dataset generation | `openai` / `anthropic` |
-| Model fine-tuning | `transformers` (Hugging Face) |
-| Training loop | `PyTorch` / `accelerate` |
-| Evaluation | `evaluate` (HF), `scikit-learn` |
-| Notebooks | `jupyter`, `matplotlib`, `seaborn` |
-| Vector search (RAG module) | `faiss-cpu` |
+| Purpose | Tool | Cost |
+|---------|------|------|
+| Dataset generation | Groq API (llama-3.1-8b) | **Free** |
+| Model fine-tuning | `transformers` (Hugging Face) | Free |
+| Training compute | Google Colab / Kaggle Notebooks | **Free** |
+| Training loop | `PyTorch` / `accelerate` | Free |
+| Evaluation | `evaluate` (HF), `scikit-learn` | Free |
+| Notebooks | `jupyter`, `matplotlib`, `seaborn` | Free |
+| Model hosting | Hugging Face Hub | **Free** |
+| Vector search (RAG module) | `faiss-cpu` | Free |
 
 ---
 
-## 🤝 Contributing
+## How to Contribute
 
 Each module follows the same pattern — if you want to add a technique:
 
@@ -141,4 +157,4 @@ Each module follows the same pattern — if you want to add a technique:
 
 ## 📄 License
 
-MIT — use freely, learn deeply.
+MIT — use freely, put your mind to work!.
