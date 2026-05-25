@@ -6,8 +6,8 @@ and prints a side-by-side comparison of results.
 
 Usage:
     python scripts/02_run_detection.py
-    python scripts/02_run_detection.py --examples 4
-    python scripts/02_run_detection.py --input data/my_emails.jsonl
+    python scripts/02_run_detection.py -- 4 examples
+    python scripts/02_run_detection.py -- input data/my_emails.jsonl
 """
 
 import os
@@ -34,7 +34,7 @@ VALID_LABELS = ["ai_phishing", "traditional_phishing", "legitimate"]
 
 # The 9 hand-crafted Owlsight test emails
 TEST_EMAILS = [
-    {"text": "Hey, quick heads up, the 3pm client call has been moved to 4pm. Same link. — Priya",
+    {"text": "Hey, quick heads up, the 3pm client call has been moved to 4pm. Same link. Priya",
      "label": "legitimate"},
     {"text": "Team, we're enabling mandatory MFA for all GitHub repos starting Monday. IT-Ops will send setup instructions to your work email.",
      "label": "legitimate"},
