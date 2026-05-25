@@ -14,23 +14,23 @@ I build this repo with the main idea of not only teaching myself but helping oth
 | # | Technique | Status | Module |
 |---|-----------|--------|--------|
 | 0 | [Zero-Shot Prompting](modules/00_zero_shot/) | ✅ Active | `modules/00_zero_shot` |
-| 1 | [Few-Shot Prompting](modules/01_few_shot/) | 🔜 Soon | `modules/01_few_shot` |
-| 2 | [Chain-of-Thought](modules/02_chain_of_thought/) | 🔜 Soon | `modules/02_chain_of_thought` |
-| 3 | [Meta Prompting](modules/03_meta_prompting/) | 🔜 Soon | `modules/03_meta_prompting` |
-| 4 | Self-Consistency | 🔜 Soon | — |
-| 5 | Generate Knowledge Prompting | 🔜 Soon | — |
-| 6 | Prompt Chaining | 🔜 Soon | — |
-| 7 | Tree of Thoughts | 🔜 Soon | — |
-| 8 | Retrieval Augmented Generation | 🔜 Soon | — |
-| 9 | Automatic Reasoning & Tool Use | 🔜 Soon | — |
-| 10 | Automatic Prompt Engineer | 🔜 Soon | — |
-| 11 | Active-Prompt | 🔜 Soon | — |
-| 12 | Directional Stimulus Prompting | 🔜 Soon | — |
-| 13 | Program-Aided Language Models | 🔜 Soon | — |
-| 14 | ReAct | 🔜 Soon | — |
-| 15 | Reflexion | 🔜 Soon | — |
-| 16 | Multimodal CoT | 🔜 Soon | — |
-| 17 | Graph Prompting | 🔜 Soon | — |
+| 1 | [Few-Shot Prompting](modules/01_few_shot/) | ✅ Active | `modules/01_few_shot` |
+| 2 | [Chain-of-Thought](modules/02_chain_of_thought/) | Soon | `modules/02_chain_of_thought` |
+| 3 | [Meta Prompting](modules/03_meta_prompting/) | Soon | `modules/03_meta_prompting` |
+| 4 | Self-Consistency | Soon | — |
+| 5 | Generate Knowledge Prompting | Soon | — |
+| 6 | Prompt Chaining | Soon | — |
+| 7 | Tree of Thoughts | Soon | — |
+| 8 | Retrieval Augmented Generation | Soon | — |
+| 9 | Automatic Reasoning & Tool Use | Soon | — |
+| 10 | Automatic Prompt Engineer | Soon | — |
+| 11 | Active-Prompt | Soon | — |
+| 12 | Directional Stimulus Prompting | Soon | — |
+| 13 | Program-Aided Language Models | Soon | — |
+| 14 | ReAct | Soon | — |
+| 15 | Reflexion | Soon | — |
+| 16 | Multimodal CoT | Soon | — |
+| 17 | Graph Prompting | Soon | — |
 
 ---
 
