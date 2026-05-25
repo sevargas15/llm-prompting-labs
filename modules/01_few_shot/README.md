@@ -32,7 +32,7 @@ data/
   few_shot_examples.jsonl    ← Curated example bank for prompting
 
 notebooks/
-  01_few_shot_prompting.ipynb    ← Start here — full guided walkthrough
+  01_few_shot_prompting.ipynb    ← Start here, this is the full guided walkthrough
 
 scripts/
   01_build_example_bank.py   ← Curate and score few-shot candidates
