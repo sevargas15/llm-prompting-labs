@@ -4,7 +4,7 @@
 
 ## What is few-shot prompting?
 
-Sometimes a model needs a nudge. Instead of just describing a task, you show it a handful of examples — and it figures out the pattern.
+Sometimes a model needs a little help. Instead of just describing a task, you show it usefull examples and it figures out the pattern.
 
 ```
 Prompt: "Classify the sentiment of this text."
@@ -14,7 +14,7 @@ Examples:
   "The flight was delayed again." → negative
   "The package arrived today." → neutral
 
-Input:  "My coffee finally kicked in."
+Input:  "I already bought my dream house!."
 Output: "positive"
 ```
 
@@ -45,7 +45,7 @@ scripts/
 
 ## How to run it
 
-The recommended way is through the notebook. Each decision is explained — why certain examples work better, what happens when you pick the wrong ones, and when more isn't better.
+The recommended way is through the notebook. Each step is explained, why certain examples work better, what happens when you pick the wrong ones, and when more isn't better.
 
 ```bash
 jupyter notebook notebooks/01_few_shot_prompting.ipynb
@@ -95,7 +95,7 @@ python scripts/04_visualize.py \
 - **Few-shot prompting:** examples act as implicit instructions the model pattern-matches against
 - **Example selection matters:** random picks underperform curated, diverse ones
 - **k has diminishing returns:** going from 1→4 examples helps; 8→16 rarely does
-- **Label balance:** skewed examples bias outputs — always balance your shot selection
+- **Label balance:** skewed examples bias outputs, always balance your shot selection
 - **Fine-tuned models are robust:** your Module 0 model likely needs zero examples to match few-shot performance
 
 ---
