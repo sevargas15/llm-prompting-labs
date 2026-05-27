@@ -1,0 +1,12 @@
+# Module generated data and figures
+modules/02_chain_of_thought/data/*
+modules/02_chain_of_thought/figures/*
+!modules/02_chain_of_thought/data/.gitkeep
+!modules/02_chain_of_thought/figures/.gitkeep
+
+# Environment and cache
+.env
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
