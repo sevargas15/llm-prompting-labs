@@ -1,8 +1,14 @@
 # Data — generated locally, not committed
 modules/*/data/*.jsonl
 modules/*/data/*.csv
+modules/*/data/*.png
 modules/*/checkpoints/
-modules/*/figures/
+modules/*/figures/*.png
+
+# Keep folder structure
+!modules/*/data/.gitkeep
+!modules/*/figures/.gitkeep
+!modules/*/checkpoints/.gitkeep
 
 # Python
 __pycache__/
